@@ -562,7 +562,13 @@ class LookupTests(TestCase):
 
     def test_in_keeps_value_ordering(self):
         query = Article.objects.filter(slug__in=['a%d' % i for i in range(1, 8)]).values('pk').query
-        self.assertIn(' IN (a1, a2, a3, a4, a5, a6, a7) ', str(query))
+        if connection.vendor == 'postgresql':
+            # For postgresql, __str__ uses pyscopg2 mogrify and will return
+            # a query with quotes around the slugs, which would run if copied
+            # to a psql console.
+            self.assertIn(' IN (\'a1\', \'a2\', \'a3\', \'a4\', \'a5\', \'a6\', \'a7\')', str(query))
+        else:
+            self.assertIn(' IN (a1, a2, a3, a4, a5, a6, a7) ', str(query))
 
     def test_error_messages(self):
         # Programming errors are pointed out with nice error messages
