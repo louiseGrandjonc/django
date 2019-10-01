@@ -386,6 +386,9 @@ class TestQuerying(PostgreSQLTestCase):
             queries[0]['sql'],
         )
 
+    def test_field_contains(self):
+        self.assertTrue(JSONModel.objects.filter(field__d__contains='e').exists())
+
 
 @isolate_apps('postgres_tests')
 class TestChecks(PostgreSQLSimpleTestCase):
